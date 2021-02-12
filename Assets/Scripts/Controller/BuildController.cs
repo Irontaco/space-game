@@ -16,10 +16,10 @@ public class BuildController : MonoBehaviour
         INTERACT
     }
 
-    public string StructureType;
-    public string StructureSprite;
+    public WorldMapController WorldController;
 
     private BuildMode buildMode;
+    public TileType CurrentTileType = TileType.Generic;
 
     public List<Vector3> VectorSelection = new List<Vector3>();
     public List<Vector3> LastVectorSelection = new List<Vector3>();
@@ -31,9 +31,6 @@ public class BuildController : MonoBehaviour
     public Vector3 SelectionStartPosition;
     public Vector3 SelectionCurrentPosition;
     private Vector3 SelectionSingle;
-
-    private int LastDragx;
-    private int LastDragy;
 
     /// <summary>
     /// Sets the vectors to be modified, updated per frame.
@@ -93,8 +90,6 @@ public class BuildController : MonoBehaviour
             }
         }
 
-        LastDragx = endDrag_x;
-        LastDragy = endDrag_y;
         LastVectorSelection = VectorSelection;
 
         CreatePreview();
@@ -192,23 +187,28 @@ public class BuildController : MonoBehaviour
                 DoBuildTile(TileSelection);
                 break;
         }
-
     }
 
     private void DoBuildTile(List<Tile> tileSelection)
     {
+
         foreach (Tile t in tileSelection)
         {
-            WorldMapController.Instance.TileManager.ChangeTileType(t, TileType.Generic);
+            WorldController.TileManager.ChangeTileType(t, CurrentTileType);
         }
 
+        WorldController.World.UpdateWorldMesh();
     }
+
     private void DoDeleteTile(List<Tile> tileSelection)
     {
         foreach (Tile t in tileSelection)
         {
-            WorldMapController.Instance.TileManager.ChangeTileType(t, TileType.None);
+            WorldController.TileManager.ChangeTileType(t, TileType.None);
         }
+
+        WorldController.World.UpdateWorldMesh();
+
     }
 
     public void SetMode(string mode)

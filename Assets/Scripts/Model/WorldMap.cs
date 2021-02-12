@@ -37,27 +37,10 @@ public class WorldMap
         Tiles = new Tile[Width,Height];
         TileVertIndex = new Dictionary<Tile, int>();
 
-
         BuildWorldMesh();
 
         //Sets the static world object to this one.
         Current = this;
-    }
-
-
-    public IEnumerator RandomizeMapTest(Dictionary<string, List<Vector2>> TileSet)
-    {
-        WaitForSeconds wait = new WaitForSeconds(1f);
-
-        for (int x = 0; x < Width; x++)
-        {
-            for (int y = 0; y < Height; y++)
-            {
-                UpdateTileUVs(Tiles[x, y], TileSet["test_" + Random.Range(1, 16)]);
-            }
-        }
-
-        yield return wait;
     }
 
     /// <summary>
@@ -94,10 +77,10 @@ public class WorldMap
                 MeshVerts[iVertCount + 2] = new Vector3(x       , 0 , y + 1 );
                 MeshVerts[iVertCount + 3] = new Vector3(x + 1   , 0 , y + 1 );
 
-                MeshUVs[iVertCount + 0] = new Vector2(.5f   , .5f  );
-                MeshUVs[iVertCount + 1] = new Vector2(.75f  , .5f  );
-                MeshUVs[iVertCount + 2] = new Vector2(.5f   , .75f );
-                MeshUVs[iVertCount + 3] = new Vector2(.75f  , .75f );
+                MeshUVs[iVertCount + 0] = new Vector2(0f   , 0f);
+                MeshUVs[iVertCount + 1] = new Vector2(0f  , 0f);
+                MeshUVs[iVertCount + 2] = new Vector2(0f, 0f);
+                MeshUVs[iVertCount + 3] = new Vector2(0f, 0f);
 
                 Tile tile = new Tile(this, Mathf.FloorToInt(MeshVerts[iVertCount + 0].x), Mathf.FloorToInt(MeshVerts[iVertCount + 0].z));
 
@@ -164,7 +147,7 @@ public class WorldMap
         {
             for (int y = 0; y < Height; y++)
             {
-                Tiles[x, y].Type = TileType.Generic;
+                Tiles[x, y].Type = TileType.None;
             }
 
         }

@@ -22,10 +22,8 @@ public class TileAtlasResolver
 
     public Dictionary<int, List<Vector2>> SpriteUvCoords;
 
-
     public TileAtlasResolver()
     {
-
         SpriteUvCoords = new Dictionary<int, List<Vector2>>();
     }
 
@@ -36,7 +34,7 @@ public class TileAtlasResolver
         TileAtlas = SprAtlas;
         uvStep = 1f / SpritePerSide;
 
-        int currentSprite = 1;
+        int currentSprite = 0;
 
         //"go through the grid" of all needed UV coords...
         for (float y = 0f; y < SpritePerSide; y++)

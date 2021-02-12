@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 
 //WorldController manages the World and it's Tile objects, both it's Model data and it's View GameObject data.
@@ -8,11 +9,12 @@ public class WorldMapController : MonoBehaviour
 {
     //WorldController instance to be statically accessed by other classes.
     public static WorldMapController Instance;
+    public GUIController GUIController;
 
     //World instance to manage through this class.
     public WorldMap World;
 
-    public TileSpriteManager TileManager;
+    public TileManagement TileManager;
 
     //Testing parameters for saving/loading
     public int WorldSizeX = 4;
@@ -31,7 +33,9 @@ public class WorldMapController : MonoBehaviour
         Instance = this;    //Set our instance to the current one.
         World = new WorldMap(WorldSizeX, WorldSizeY); //Set a world to use.
 
-        TileManager = new TileSpriteManager(World);
+        TileManager = new TileManagement(World);
+
+        Debug.Log(TileManager);
 
         MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
         meshRenderer.sharedMaterial = AssetLoader.MaterialLibrary["test"];
@@ -39,84 +43,28 @@ public class WorldMapController : MonoBehaviour
 
         meshFilter.mesh = World.WorldMesh;
 
-        TileAtlasResolver AtlasResolver = new TileAtlasResolver();
+        Dictionary<string, TileType> TempSpriteNames = new Dictionary<string, TileType>();
 
-        Dictionary<int, List<Vector2>> TileSet = AtlasResolver.GenerateUvAtlas(4, AssetLoader.TileLibrary["test"]);
-
-        StartCoroutine(RandomizeMapTest(TileSet));
-
-        
-
-    }
-
-    public IEnumerator RandomizeMapTest(Dictionary<int, List<Vector2>> TileSet)
-    {
-
-        WaitForSecondsRealtime wait = new WaitForSecondsRealtime(.001f);
-        for (int i = 0; i < 10000; i++)
-        {
-            for (int x = 0; x < World.Width; x++)
-            {
-                for (int y = 0; y < World.Height; y++)
-                {
-                    World.UpdateTileUVs(World.Tiles[x, y], TileSet[Random.Range(1, 16)]);
-                }
-            }
-
-            World.UpdateWorldMesh();
-
-            yield return wait;
-        }
-    }
-
-    /*
-    void OnDrawGizmos()
-    {
-        if (!Application.isPlaying)
-        {
-            return;
-        }
-
-        if (World.verts == null)
-        {
-            return;
-        }
-        Gizmos.color = new Color32(0, 255, 0, 100);
-
-        foreach (Vector3 vec in World.verts)
-        {
-            Gizmos.DrawSphere(vec, 0.05f);
-
-        }
-    }
-    */
-
-    /// <summary>
-    /// Instantiates all tile objects, then rolls for Landmark creation.
-    /// </summary>
-    void InstantiateTileObjects()
-    {
+        TempSpriteNames.Add("Purple", TileType.Generic);
+        TempSpriteNames.Add("Blue", TileType.Blue);
+        TempSpriteNames.Add("Yellow", TileType.Yellow);
+        TempSpriteNames.Add("Green", TileType.Green);
+        TempSpriteNames.Add("Space", TileType.None);
 
         World.SetTiles();
 
-        int i = 0;
-
-        //Iterates through the requested World's Tile data objects, creating a GameObject that visually represents the Tile.
-        // 100x100 2D array of Tile, which adds up to about 10000 Tile GameObjects.
-        for (int x = 0; x < World.Width; x++)
+        foreach(Tile t in World.Tiles)
         {
-            for (int y = 0; y < World.Height; y++)
-            {
-                Tile tile = World.GetTileAt(x, y);
-
-                TileManager.CreateTile(tile);
-                i++;
-            }
+            TileManager.InitialTileState(t);
         }
 
-        Debug.Log("Created " + i + " tiles. World creation successful!");
+        World.UpdateWorldMesh();
+
+        GUIController.GetComponent<GUIController>().CreateTileTypeButtons(TempSpriteNames);
 
     }
+
+
 
     /// <summary>
     /// Returns a Tile at the specified Vector coordinates.

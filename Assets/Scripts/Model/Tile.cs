@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 
 //Tiles can be of types defined in the enum.
-public enum TileType { None, Generic, Grass, Wood, Stone, Steel };
+public enum TileType { Generic, Blue, Yellow, Green, None };
 
 //Tiles are the main component of the game world's interactability. Everything is managed by Tile object locations, and everything will be placed on top of Tiles.
 public class Tile
@@ -21,7 +21,7 @@ public class Tile
     public int Y { get; protected set; }
 
     //Callback called whenever this Tile changes, this triggers the tile to call for changes automatically.
-    public event Action<Tile> OnChanged;
+    public static event Action<Tile> OnChanged;
 
     public TileType Type
     {
@@ -49,6 +49,7 @@ public class Tile
         this.Y = y;
 
     }
+
 
 }
 
