@@ -16,11 +16,16 @@ public class CameraController : MonoBehaviour
     //Tracks if the camera is in EDIT/PLAY mode.
     public bool followPlayer = false;
 
+    void Start()
+    {
+        MainCamera.transform.position = new Vector3(WorldMap.Current.Width / 2, 10, WorldMap.Current.Height / 2);
+    }
+
     // Update is called once per frame
     void Update()
     {
         CameraPosition = MainCamera.transform.position;
-
+        
         //PLAY-MODE CAMERA
         if (followPlayer)
         {

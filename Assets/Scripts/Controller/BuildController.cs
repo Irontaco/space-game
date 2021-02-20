@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -10,9 +11,9 @@ public class BuildController : MonoBehaviour
     private enum BuildMode
     {
         TILE,
-        STRUCTURE,
+        THING,
         DELETETILE,
-        DELETESTRUCTURE,
+        DELETETHING,
         INTERACT
     }
 
@@ -107,7 +108,7 @@ public class BuildController : MonoBehaviour
         preview.transform.Rotate(new Vector3(90, 0, 0));
         preview.AddComponent<SpriteRenderer>();
         preview.GetComponent<SpriteRenderer>().sprite = PreviewSprite;
-        preview.GetComponent<SpriteRenderer>().sortingLayerName = "Structure";
+        preview.GetComponent<SpriteRenderer>().sortingLayerName = "Preview";
 
         PreviewPooler.PreLoad(preview, 200);
         Destroy(preview);
@@ -186,6 +187,54 @@ public class BuildController : MonoBehaviour
             case BuildMode.TILE:
                 DoBuildTile(TileSelection);
                 break;
+            case BuildMode.THING:
+                DoBuildThing(TileSelection);
+                break;
+            case BuildMode.DELETETHING:
+                DoDeleteThing(TileSelection);
+                break;
+        }
+    }
+
+    private void DoDeleteThing(List<Tile> tileSelection)
+    {
+        foreach(Tile t in tileSelection)
+        {
+            if(t.Thing != null)
+            {
+                Destroy(t.Thing.GameObject);
+                t.ClearThing();
+            }
+        }
+    }
+
+    private void DoBuildThing(List<Tile> tileSelection)
+    {
+        foreach (Tile t in tileSelection)
+        {
+            GameObject g = new GameObject();
+            Wall w = g.AddComponent<Wall>();
+
+            if (t.TrySetThing(w) != false && t.Type != TileType.None)
+            {
+                w.Tile = t;
+                w.CurrentSprite.sprite = AssetLoader.ThingLibrary["wall_test_pillar"];
+                w.Height = 1;
+                w.Height = 1;
+                w.CanWalkOver = false;
+                w.CanBuildUnder = true;
+                w.GameObject = g;
+
+                w.transform.position = new Vector3(t.X, 0, t.Y);
+                w.transform.Rotate(new Vector3(90, 0, 0));
+                w.CurrentSprite.sortingLayerName = "Thing";
+                w.name = "WALLTEST";
+            }
+            else
+            {
+                Destroy(g);
+            }
+
         }
     }
 
@@ -221,6 +270,12 @@ public class BuildController : MonoBehaviour
                 break;
             case "DeleteTile":
                 buildMode = BuildMode.DELETETILE;
+                break;
+            case "Thing":
+                buildMode = BuildMode.THING;
+                break;
+            case "DeleteThing":
+                buildMode = BuildMode.DELETETHING;
                 break;
         }
     }

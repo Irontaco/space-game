@@ -11,6 +11,7 @@ public class AssetLoader : MonoBehaviour
     //Stores all prefabs, sprites.
     public static Dictionary<string, GameObject> PrefabLibrary;
     public static Dictionary<string, Sprite> TileLibrary;
+    public static Dictionary<string, Sprite> ThingLibrary;
     public static Dictionary<string, Material> MaterialLibrary;
 
     void Awake()
@@ -48,6 +49,15 @@ public class AssetLoader : MonoBehaviour
         foreach(Material m in Materials)
         {
             MaterialLibrary.Add(m.name, m);
+        }
+
+        Sprite[] Things = Resources.LoadAll<Sprite>("Images/Things");
+
+        ThingLibrary = new Dictionary<string, Sprite>();
+
+        foreach(Sprite s in Things)
+        {
+            ThingLibrary.Add(s.name, s);
         }
 
     }

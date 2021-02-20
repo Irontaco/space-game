@@ -35,8 +35,6 @@ public class WorldMapController : MonoBehaviour
 
         TileManager = new TileManagement(World);
 
-        Debug.Log(TileManager);
-
         MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
         meshRenderer.sharedMaterial = AssetLoader.MaterialLibrary["test"];
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
@@ -63,6 +61,7 @@ public class WorldMapController : MonoBehaviour
         GUIController.GetComponent<GUIController>().CreateTileTypeButtons(TempSpriteNames);
 
     }
+
 
 
 

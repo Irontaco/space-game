@@ -20,6 +20,8 @@ public class Tile
     public int X { get; protected set; }
     public int Y { get; protected set; }
 
+    public IBaseThing Thing;
+
     //Callback called whenever this Tile changes, this triggers the tile to call for changes automatically.
     public static event Action<Tile> OnChanged;
 
@@ -47,9 +49,41 @@ public class Tile
         this.World = world;
         this.X = x;
         this.Y = y;
-
     }
 
+    /// <summary>
+    /// Sets a reference for a Thing on the Tile.
+    /// </summary>
+
+    public bool TrySetThing(IBaseThing thing)
+    {
+        if(Thing == null)
+        {
+            //TODO: Must check for Thing size!
+
+            Thing = thing;
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Clears a Thing from the Tile.
+    /// </summary>
+    public void ClearThing()
+    {
+        //There's nothing here.
+        if (Thing == null)
+        {
+            return;
+        }
+
+        Thing = null;
+    }
 
 }
 

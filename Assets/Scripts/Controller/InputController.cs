@@ -82,10 +82,7 @@ public class InputController : MonoBehaviour
         //Left-click held, something's being previewed and prepared for building.
         if (Input.GetMouseButton(0))
         {
-            if(CurrentMousePosition != LastMousePosition)
-            {
-                BuildController.SetSelectionVectors(CurrentMousePosition);
-            }
+            BuildController.SetSelectionVectors(CurrentMousePosition);
         }
 
         //Left-click up, we have to determine if this was a request to build, or an interaction.

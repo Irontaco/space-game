@@ -99,10 +99,19 @@ public class GUIController : MonoBehaviour
         CreateTileTypeButtonList();
     }
 
+    public void CreateStructure()
+    {
+        BuildController.SetMode("Thing");
+    }
+
+    public void DeleteStructure()
+    {
+        BuildController.SetMode("DeleteThing");
+    }
+
     public void CreateTile()
     {
 
-        Debug.Log("we've been called!");
         BuildController.SetMode("Tile");
     }
 
