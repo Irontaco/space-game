@@ -33,6 +33,7 @@ public class BuildController : MonoBehaviour
     public Vector3 SelectionCurrentPosition;
     private Vector3 SelectionSingle;
 
+
     /// <summary>
     /// Sets the vectors to be modified, updated per frame.
     /// </summary>
@@ -127,6 +128,7 @@ public class BuildController : MonoBehaviour
             GameObject preview = PreviewPooler.Spawn();
             preview.name = "PreviewTile[" + vec.x + "," + vec.z + "]";
             preview.transform.position = vec;
+            preview.transform.position += new Vector3(0, 0.01f, 0);
 
             PreviewTileSelection.Add(preview);
         }
@@ -202,8 +204,8 @@ public class BuildController : MonoBehaviour
         {
             if(t.Thing != null)
             {
-                Destroy(t.Thing.GameObject);
-                t.ClearThing();
+                t.Thing.DeleteThing();
+
             }
         }
     }
@@ -212,29 +214,13 @@ public class BuildController : MonoBehaviour
     {
         foreach (Tile t in tileSelection)
         {
-            GameObject g = new GameObject();
-            Wall w = g.AddComponent<Wall>();
-
-            if (t.TrySetThing(w) != false && t.Type != TileType.None)
+            if(t.Type != TileType.None && t.Thing == null)
             {
-                w.Tile = t;
-                w.CurrentSprite.sprite = AssetLoader.ThingLibrary["wall_test_pillar"];
-                w.Height = 1;
-                w.Height = 1;
-                w.CanWalkOver = false;
-                w.CanBuildUnder = true;
-                w.GameObject = g;
+                GameObject g = new GameObject();
+                Wall w = g.AddComponent<Wall>();
 
-                w.transform.position = new Vector3(t.X, 0, t.Y);
-                w.transform.Rotate(new Vector3(90, 0, 0));
-                w.CurrentSprite.sortingLayerName = "Thing";
-                w.name = "WALLTEST";
+                w.CreateThing(t, 1, 1, true, g);
             }
-            else
-            {
-                Destroy(g);
-            }
-
         }
     }
 

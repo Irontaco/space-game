@@ -38,7 +38,6 @@ public class AssetLoader : MonoBehaviour
         TileLibrary = new Dictionary<string, Sprite>();
         foreach (Sprite s in TileSprites)
         {
-            Debug.Log("Loaded sprite = " + s.name);
             TileLibrary.Add(s.name, s);
         }
 

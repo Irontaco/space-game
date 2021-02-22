@@ -41,3 +41,18 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Background
+    uniqueID: 1556567323
+    locked: 0
+  - name: Tile
+    uniqueID: 4020050085
+    locked: 0
+  - name: Player
+    uniqueID: 169245447
+    locked: 0
+  - name: Thing
+    uniqueID: 1560457889
+    locked: 0
+  - name: Preview
+    uniqueID: 160454597
+    locked: 0

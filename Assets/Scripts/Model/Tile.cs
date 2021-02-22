@@ -20,10 +20,7 @@ public class Tile
     public int X { get; protected set; }
     public int Y { get; protected set; }
 
-    public IBaseThing Thing;
-
-    //Callback called whenever this Tile changes, this triggers the tile to call for changes automatically.
-    public static event Action<Tile> OnChanged;
+    public BaseThing Thing;
 
     public TileType Type
     {
@@ -34,12 +31,6 @@ public class Tile
             //Keep track of the old type before we replace it.
             TileType oldtype = _type;
             _type = value;
-
-            //if the tile exists, and it's not the previous tile type, then we update the tile.
-            if (OnChanged != null && oldtype != _type)
-            {
-                OnChanged(this);
-            }
         }
     }
 
@@ -51,39 +42,17 @@ public class Tile
         this.Y = y;
     }
 
-    /// <summary>
-    /// Sets a reference for a Thing on the Tile.
-    /// </summary>
-
-    public bool TrySetThing(IBaseThing thing)
+    public void PlaceThing(BaseThing thing)
     {
-        if(Thing == null)
-        {
-            //TODO: Must check for Thing size!
-
-            Thing = thing;
-
-            return true;
+        if(Thing != null) {
+            return;
         }
         else
         {
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Clears a Thing from the Tile.
-    /// </summary>
-    public void ClearThing()
-    {
-        //There's nothing here.
-        if (Thing == null)
-        {
-            return;
+            Thing = thing;
         }
 
-        Thing = null;
     }
-
+    
 }
 

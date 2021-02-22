@@ -1,12 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public interface ISegmentable
 {
 
-    bool UpdateNeighbors(ISegmentable segment);
-    bool GetNeighbors();
-    bool SetSprites();
+    void UpdateNeighbors();
+    void UpdateSelf();
+    void CreateSegment();
+    void DeleteSegment();
 
 }
