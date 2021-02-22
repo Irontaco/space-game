@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -26,11 +27,6 @@ public class InputController : MonoBehaviour
     //Controllers to manipulate.
     public CameraController CameraController;
     public BuildController BuildController;
-
-    //Tile currently under the mouse position, sent to BuilderController.
-    private Tile TileUnderMouse;
-
-    private bool ControlPlayer;
 
     // Update is called once per frame
     void Update()
@@ -80,8 +76,9 @@ public class InputController : MonoBehaviour
             BuildController.SelectionStartPosition = CurrentMousePosition;
         }
         //Left-click held, something's being previewed and prepared for building.
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && BuildController.ReadyForCall())
         {
+
             BuildController.SetSelectionVectors(CurrentMousePosition);
         }
 
@@ -118,39 +115,8 @@ public class InputController : MonoBehaviour
         MoveAxisX = Input.GetAxisRaw("Horizontal");
         MoveAxisY = Input.GetAxisRaw("Vertical");
 
-        if (!ControlPlayer)
-        {
-            //Give CameraController's DragCamera a vector to move towards, depending on what has been pressed.
-            //These vectors have to be diminished, lest we zoom by the map extremely quickly.
-            CameraController.DragCamera(new Vector3(MoveAxisX / 15, 0, MoveAxisY / 15));
-        }
-
-        //P key is for switching the camera into player mode.
-        //TODO: This must change building behavior too.
-        if (Input.GetKeyUp(KeyCode.P))
-        {
-            SetPlayMode();
-        }
-
+        CameraController.DragCamera(new Vector3(MoveAxisX / 15, 0, MoveAxisY / 15));
     }
-
-
-    /// <summary>
-    /// Sets the game to PLAYMODE/BUILDMODE
-    /// This changes the behaviors of things like the camera, movement, UI, etc.
-    /// </summary>
-    public void SetPlayMode()
-    {
-
-        ControlPlayer = !ControlPlayer;
-        CameraController.followPlayer = !CameraController.followPlayer;
-
-        //We have to nullify these, to prevent the player/camera from continuing to move, if the mode is switched suddenly.
-        //PlayerController.MoveX = MoveAxisX = 0;
-        //PlayerController.MoveY = MoveAxisY = 0;
-
-    }
-
 
     public void Quit()
     {

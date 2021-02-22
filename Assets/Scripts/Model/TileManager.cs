@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class TileManagement
 {
@@ -22,13 +23,13 @@ public class TileManagement
 
         TileResolver = new TileAtlasResolver();
 
-        TileAtlas = TileResolver.GenerateUvAtlas(4, AssetLoader.TileLibrary["test"]);
+        TileAtlas = TileResolver.GenerateUvAtlas(8, AssetLoader.TileLibrary["TileAtlas"]);
 
     }
 
     public void InitialTileState(Tile tile)
     {
-        World.UpdateTileUVs(tile, TileAtlas[4]);
+        World.UpdateTileUVs(tile, TileAtlas[16 + Random.Range(0, 26)]);
     }
 
     private void OnTileUpdate(Tile tile)
@@ -50,7 +51,7 @@ public class TileManagement
                 World.UpdateTileUVs(tile, TileAtlas[3]);
                 break;
             case TileType.None:
-                World.UpdateTileUVs(tile, TileAtlas[4]);
+                World.UpdateTileUVs(tile, TileAtlas[16 + Random.Range(0, 26)]);
                 break;
             default:
                 Debug.LogError("We were provided an incorrect TileType!");

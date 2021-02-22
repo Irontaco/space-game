@@ -14,8 +14,8 @@ public class TileAtlasResolver
     //We will assume we will have 16 possible tile sprites for the time being...
 
     //Sprites present in the atlas
-    private int SpriteNum = 16;
-    private int SpritePerSide = 4;
+    private int SpriteNum = 64;
+    private int SpritePerSide = 8;
     private float uvStep;
 
     private Sprite TileAtlas;

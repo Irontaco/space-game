@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using TMPro;
-using UnityEditor.SceneManagement;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Wall : BaseThing, ISegmentable
 {
@@ -39,6 +33,7 @@ public class Wall : BaseThing, ISegmentable
     {
 
         Destroy(GameObject);
+
         Tile.Thing = null;
 
         UpdateNeighbors();
@@ -65,6 +60,7 @@ public class Wall : BaseThing, ISegmentable
                 }
             }
         }
+
     }
 
     public void UpdateSelf()

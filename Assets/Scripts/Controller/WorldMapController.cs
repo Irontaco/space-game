@@ -36,7 +36,7 @@ public class WorldMapController : MonoBehaviour
         TileManager = new TileManagement(World);
 
         MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        meshRenderer.sharedMaterial = AssetLoader.MaterialLibrary["test"];
+        meshRenderer.sharedMaterial = AssetLoader.MaterialLibrary["TileAtlas"];
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
 
         meshFilter.mesh = World.WorldMesh;

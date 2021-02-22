@@ -1,10 +1,4 @@
-﻿using System;
-using System.Reflection;
-using System.Text;
-using TMPro;
-using UnityEngine;
-
-//Tiles can be of types defined in the enum.
+﻿//Tiles can be of types defined in the enum.
 public enum TileType { Generic, Blue, Yellow, Green, None };
 
 //Tiles are the main component of the game world's interactability. Everything is managed by Tile object locations, and everything will be placed on top of Tiles.

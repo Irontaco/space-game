@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
+using System.Numerics;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 public class BuildController : MonoBehaviour
 {
@@ -13,26 +17,70 @@ public class BuildController : MonoBehaviour
         TILE,
         THING,
         DELETETILE,
-        DELETETHING,
-        INTERACT
+        DELETETHING
     }
 
-    public WorldMapController WorldController;
-
     private BuildMode buildMode;
+
+    public WorldMapController WorldController;
+    private TileAtlasResolver AtlasResolver;
+
     public TileType CurrentTileType = TileType.Generic;
 
-    public List<Vector3> VectorSelection = new List<Vector3>();
-    public List<Vector3> LastVectorSelection = new List<Vector3>();
+    private readonly HashSet<Vector3> VectorSelectionSet = new HashSet<Vector3>();
 
-    public Sprite PreviewSprite;
-    public List<GameObject> PreviewTileSelection;
-    public Pooler PreviewPooler;
+    private Mesh PreviewMesh;
+    private Vector3[] MeshVerts;
+    private Vector2[] PreviewMeshUVs;
+
+    private GameObject PreviewMeshGO;
+
+    private Dictionary<int, List<Vector2>> PreviewTileSprite;
 
     public Vector3 SelectionStartPosition;
     public Vector3 SelectionCurrentPosition;
-    private Vector3 SelectionSingle;
 
+    private float timeSinceLastCall;
+
+    void Start()
+    {
+
+        AtlasResolver = new TileAtlasResolver();
+
+        PreviewTileSprite = new Dictionary<int, List<Vector2>>
+        {
+            [0] = AtlasResolver.GenerateUvAtlas(8, AssetLoader.TileLibrary["PreviewAtlas"])[0]
+        };
+
+        //instantiate new mesh
+        PreviewMesh = new Mesh();
+
+        PreviewMeshGO = new GameObject();
+
+        MeshRenderer meshRenderer = PreviewMeshGO.AddComponent<MeshRenderer>();
+        meshRenderer.sharedMaterial = AssetLoader.MaterialLibrary["PreviewAtlas"];
+        MeshFilter meshFilter = PreviewMeshGO.AddComponent<MeshFilter>();
+
+        meshFilter.mesh = PreviewMesh;
+
+    }
+
+    void Update()
+    {
+        timeSinceLastCall += Time.deltaTime;
+    }
+
+    public bool ReadyForCall()
+    {
+        if (timeSinceLastCall > 0.04f)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     /// <summary>
     /// Sets the vectors to be modified, updated per frame.
@@ -41,7 +89,11 @@ public class BuildController : MonoBehaviour
     /// NOTE: Z is treated as Y within code.
     public void SetSelectionVectors(Vector3 currPos)
     {
-        
+        if(VectorSelectionSet.Count > (128 * 128))
+        {
+            if(timeSinceLastCall < 0.10f) { return; }
+        }
+
         if(WorldMapController.Instance.GetTileAtWorldVector(currPos) == null)
         {
             return;
@@ -69,113 +121,51 @@ public class BuildController : MonoBehaviour
             startDrag_y = tmp;
         }
 
-        DestroyPreview();
+        VectorSelectionSet.Clear();
+        PreviewMesh.Clear();
 
-        VectorSelection.Clear();
-        PreviewTileSelection.Clear();
+        Vector3 vectorTest = new Vector3(0, 0, 0);
 
         for (int x = startDrag_x; x <= endDrag_x; x++)
         {
             for (int y = startDrag_y; y <= endDrag_y; y++)
             {
-                Vector3 vec = new Vector3(x, 0, y);
+                vectorTest.Set(x, 0, y);
 
-                if(WorldMapController.Instance.GetTileAtWorldVector(vec) == null)
+                if (VectorSelectionSet.Contains(vectorTest) || WorldMapController.Instance.GetTileAtWorldVector(vectorTest) == null)
                 {
-                    Debug.Log("Tile at (" + x + "," + y + ") was out of range. It won't be added to the selection.");
-                    return;
+                    continue;
                 }
-                if (!VectorSelection.Contains(vec))
+                else
                 {
-                    VectorSelection.Add(vec);
+                    VectorSelectionSet.Add(vectorTest);
+                    continue;
                 }
             }
         }
 
-        LastVectorSelection = VectorSelection;
+        PreviewMesh = BuildPreviewMesh();
 
-        CreatePreview();
+        timeSinceLastCall = 0f;
     }
-
-    void Start()
-    {
-
-        GameObject PreviewPoolerObject = new GameObject();
-        PreviewPooler = PreviewPoolerObject.AddComponent<Pooler>();
-
-        GameObject preview = new GameObject();
-
-        preview.name = "PreviewTile";
-        preview.transform.Rotate(new Vector3(90, 0, 0));
-        preview.AddComponent<SpriteRenderer>();
-        preview.GetComponent<SpriteRenderer>().sprite = PreviewSprite;
-        preview.GetComponent<SpriteRenderer>().sortingLayerName = "Preview";
-
-        PreviewPooler.PreLoad(preview, 200);
-        Destroy(preview);
-
-
-    }
-
-    /// <summary>
-    /// Creates tile preview GameObjects from a vector list.
-    /// </summary>
-    private void CreatePreview()
-    {
-
-        foreach (Vector3 vec in VectorSelection)
-        {
-            GameObject preview = PreviewPooler.Spawn();
-            preview.name = "PreviewTile[" + vec.x + "," + vec.z + "]";
-            preview.transform.position = vec;
-            preview.transform.position += new Vector3(0, 0.01f, 0);
-
-            PreviewTileSelection.Add(preview);
-        }
-
-    }
-
-    /// <summary>
-    /// Destroys the tile preview GameObjects.
-    /// </summary>
-    public void DestroyPreview()
-    {
-
-        if (PreviewTileSelection == null)
-        {
-            return;
-        }
-
-        if (PreviewTileSelection.Count == 0)
-        {
-            return;
-        }
-
-        foreach (GameObject go in PreviewTileSelection)
-        {
-            PreviewPooler.Despawn(go);
-        }
-
-        PreviewTileSelection.Clear();
-    }
-
 
     /// <summary>
     /// Figures out what to do based on the buildMode.
     /// </summary>
     public void ResolveContext()
     {
-        DestroyPreview();
+        PreviewMesh.Clear();
 
-        Tile tileSingle = WorldMapController.Instance.GetTileAtWorldVector(SelectionSingle);
         List<Tile> TileSelection = new List<Tile>();
 
-        foreach (Vector3 v in VectorSelection)
+        foreach (Vector3 v in VectorSelectionSet)
         {
             TileSelection.Add(WorldMapController.Instance.GetTileAtWorldVector(v));
         }
 
-        if (TileSelection == null || tileSingle == null)
+        VectorSelectionSet.Clear();
+
+        if (TileSelection == null)
         {
             Debug.LogError("The tile selection given was null, likely to be caused by the vectors given previously.");
             return;
@@ -264,6 +254,54 @@ public class BuildController : MonoBehaviour
                 buildMode = BuildMode.DELETETHING;
                 break;
         }
+    }
+    private Mesh BuildPreviewMesh()
+    {
+        if (VectorSelectionSet.Count > (128 * 128))
+        {
+            PreviewMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        }
+
+        //One quad per tile
+        int tiles = VectorSelectionSet.Count;
+
+        //4 vertexes per quad, non-shared
+        MeshVerts = new Vector3[tiles * 4];
+        PreviewMeshUVs = new Vector2[MeshVerts.Length];
+
+        int[] tris = new int[tiles * 6];
+        int iIndexCount = 0;
+        int iVertCount = 0;
+
+        foreach (Vector3 vec in VectorSelectionSet)
+        {
+            //now entering baby hell
+            //represents a quad, counter-clockwise.
+            MeshVerts[iVertCount + 0] = new Vector3(vec.x, 0, vec.z);
+            MeshVerts[iVertCount + 1] = new Vector3(vec.x + 1, 0, vec.z);
+            MeshVerts[iVertCount + 2] = new Vector3(vec.x, 0, vec.z + 1);
+            MeshVerts[iVertCount + 3] = new Vector3(vec.x + 1, 0, vec.z + 1);
+
+            PreviewMeshUVs[iVertCount + 0] = PreviewTileSprite[0][0];
+            PreviewMeshUVs[iVertCount + 1] = PreviewTileSprite[0][1];
+            PreviewMeshUVs[iVertCount + 2] = PreviewTileSprite[0][2];
+            PreviewMeshUVs[iVertCount + 3] = PreviewTileSprite[0][3];
+
+            tris[iIndexCount + 0] += (iVertCount + 0);
+            tris[iIndexCount + 1] += (iVertCount + 2);
+            tris[iIndexCount + 2] += (iVertCount + 1);
+            tris[iIndexCount + 3] += (iVertCount + 2);
+            tris[iIndexCount + 4] += (iVertCount + 3);
+            tris[iIndexCount + 5] += (iVertCount + 1);
+
+            iVertCount += 4; iIndexCount += 6;
+        }
+
+        PreviewMesh.vertices = MeshVerts;
+        PreviewMesh.triangles = tris;
+        PreviewMesh.uv = PreviewMeshUVs;
+
+        return PreviewMesh;
     }
 
 }

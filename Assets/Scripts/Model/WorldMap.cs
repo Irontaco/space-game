@@ -159,11 +159,11 @@ public class WorldMap
     public Tile GetTileAt(int x, int y)
     {
         //Checks for the Tile being out of the World array dimensions, returns null if so.
-        if (x >= Width || x < 0 || y >= Width || y < 0)
+        /*if (x >= Width || x < 0 || y >= Width || y < 0)
         {
             Debug.LogError("Tile at (" + x + "," + y + ") is out of range!");
             return null;
-        }
+        }*/
 
         try
         {

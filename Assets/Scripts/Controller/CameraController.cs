@@ -82,6 +82,6 @@ public class CameraController : MonoBehaviour
         MainCamera.orthographicSize -= (Screen.height / (32 * 1) * ZoomAmmount);
 
         //Clamp it, this sets the minimum-maximum orthographic size.
-        MainCamera.orthographicSize = Mathf.Clamp(MainCamera.orthographicSize, 1f, 50f);
+        MainCamera.orthographicSize = Mathf.Clamp(MainCamera.orthographicSize, 1f, 70f);
     }
 }
